@@ -1,0 +1,12 @@
+<div class="flex-c">
+
+  @for (boxItem of appStore.updatedBoxValues(); track boxItem.index; let  i = $index){
+    <app-box [boxValue]="boxItem.value" (boxSelection)="setOrder(i+1, boxItem)" [boxIndex]="i+1"/>
+  }
+  <div>
+    <button (click)="appStore.clearBoxes()">clear</button>
+    <p>{{appStore.getTotalValue()}}</p>
+  </div>
+</div>
+
+
