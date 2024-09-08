@@ -67,19 +67,21 @@ export const AppStore = signalStore(
     },
     symbolArray: symbolsArray,
     totalValue: 0,
+    previousLastScore: 0,
     symbolToColor: {
       text: '',
       category: CategoryEnum.INITIAL,
       score: 0
     }
   }),
-  withComputed(({boxesValue, selectedBox, selectedSymbol, symbolArray, totalValue, symbolToColor}) => ({
+  withComputed(({boxesValue, selectedBox, selectedSymbol, symbolArray, totalValue, symbolToColor, previousLastScore}) => ({
     updatedBoxValues: computed(()=>boxesValue()),
     boxesLength: computed(()=>boxesValue().length * selectedBox().index),
     getSelectedBox: computed(()=> selectedBox()),
     getSelectedSymbol: computed(()=> selectedSymbol()),
     getTotalValue: computed(()=> totalValue()),
     symbolToColor: computed(()=> symbolToColor()),
+    previousLastScore: computed(()=> previousLastScore()),
 
     fsSymbols: computed(()=> symbolArray().filter(s=>s.category === CategoryEnum.FS)),
     bsSymbols: computed(()=> symbolArray().filter(s=>s.category === CategoryEnum.BS)),
@@ -87,20 +89,21 @@ export const AppStore = signalStore(
   })),
   withMethods((store)=>({
     selectBox(box: Box){
-      patchState(store, {
-        selectedBox: {
-          index: box.index,
-          value: {
-            text: box.value.text,
-            category: box.value.category,
-            score: box.value.score
-          }
-        },
+        patchState(store, {
+          selectedBox: {
+            index: box.index,
+            value: {
+              text: box.value.text,
+              category: box.value.category,
+              score: box.value.score
+            }
+          },
 
-      });
-      patchState(store, {symbolToColor: box.value});
+        });
+        patchState(store, {symbolToColor: box.value});
     },
     selectSymbol(sym: Symbol){
+      patchState(store, {previousLastScore: store.updatedBoxValues()[9].value.score})
       patchState(store, {selectedSymbol: sym});
       patchState(store, {symbolToColor: sym});
 
@@ -124,11 +127,7 @@ export const AppStore = signalStore(
       }
 
       if (store.getSelectedBox().index === 10){
-        if (store.getSelectedBox().value.score === 0){
-          patchState(store, {totalValue: store.getTotalValue()});
-        }else {
-          patchState(store, {totalValue: store.totalValue()-store.getSelectedBox().value.score + store.selectedSymbol().score});
-        }
+        patchState(store, {totalValue: store.totalValue()-store.previousLastScore() + store.selectedSymbol().score- store.selectedSymbol().score});
         localStorage.setItem('totalValue', store.totalValue().toString())
       }
 

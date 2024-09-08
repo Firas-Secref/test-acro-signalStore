@@ -8,4 +8,5 @@ export interface AppState{
   symbolToColor: Symbol;
   symbolArray: Symbol[];
   totalValue: number;
+  previousLastScore: number;
 }
